@@ -1,0 +1,435 @@
+[
+    {
+        "id": "0395f5bb7c49302c",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "c664bd839b155b50",
+        "type": "ui_gauge",
+        "z": "0395f5bb7c49302c",
+        "name": "",
+        "group": "10956751da83f232",
+        "order": 5,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "Medidor de Humedad",
+        "label": "%",
+        "format": "{{msg.payload.humidity}}",
+        "min": "0",
+        "max": "100",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 1080,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "594282f31f1946d9",
+        "type": "ui_gauge",
+        "z": "0395f5bb7c49302c",
+        "name": "",
+        "group": "10956751da83f232",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "Medidor de Temperatura",
+        "label": "°C",
+        "format": "{{msg.payload.temperature}}",
+        "min": "-20",
+        "max": "90",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 1070,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "f779b5d4d8c59d07",
+        "type": "function",
+        "z": "0395f5bb7c49302c",
+        "name": "grafico de humedad ",
+        "func": "// Recupera el array de objetos desde msg.payload\nconst humidity = msg.payload[0].humidity;\nmsg.payload = humidity;\nreturn msg;\n\n\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 800,
+        "y": 440,
+        "wires": [
+            [
+                "c7c294d85ef387ec"
+            ]
+        ]
+    },
+    {
+        "id": "8a68c44c7c9d66c9",
+        "type": "function",
+        "z": "0395f5bb7c49302c",
+        "name": "Umbral temperatura",
+        "func": "// Umbral de temperatura\nconst temperatureThreshold = 35; // Cambia este valor al umbral deseado\n\n// Obtén el valor de temperatura\nlet temperature = msg.payload[0].temperature;\n\n// Verifica si la temperatura supera el umbral\nif (temperature >= temperatureThreshold) {\n    // Establece el mensaje de notificación\n    msg.payload = `¡Alerta! Temperatura alta: ${temperature} °C`;\n    msg.topic = \"Alerta de Temperatura\"; // Este texto se mostrará en el campo Topic del nodo de notificación\n} else {\n    // Si no se alcanza el umbral, detiene la notificación\n    msg = null;\n}\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 800,
+        "y": 80,
+        "wires": [
+            [
+                "594282f31f1946d9",
+                "5f287e4c79591d49"
+            ]
+        ]
+    },
+    {
+        "id": "48f923d0096f131e",
+        "type": "function",
+        "z": "0395f5bb7c49302c",
+        "name": "umbral humedad",
+        "func": "// Umbral de Humedad\nconst humidityThreshold = 30; // Valor de umbral deseado\n\n// Obtén el valor de Humedad\nlet humidity = msg.payload[0].humidity;\n\n// Verifica si la Humedad supera el umbral\nif (humidity >= humidityThreshold) {\n    // Establece el mensaje de notificación\n    msg.payload = `¡Alerta! Humedad alta: ${humidity} %`; // Asegúrate de usar el símbolo `%` si es una lectura de humedad\n    msg.topic = \"Alerta de Humedad\"; // Este texto se mostrará en el campo Topic del nodo de notificación\n} else {\n    // Si no se alcanza el umbral, detiene la notificación\n    msg = null;\n}\n\n// Retorna el mensaje para continuar con el flujo\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 770,
+        "y": 600,
+        "wires": [
+            [
+                "c664bd839b155b50",
+                "712dacd822b15cb2"
+            ]
+        ]
+    },
+    {
+        "id": "9a06aacacfc43246",
+        "type": "mysql",
+        "z": "0395f5bb7c49302c",
+        "mydb": "029119d4ed087382",
+        "name": "evidencia2",
+        "x": 510,
+        "y": 220,
+        "wires": [
+            [
+                "48f923d0096f131e",
+                "8a68c44c7c9d66c9",
+                "f779b5d4d8c59d07",
+                "56b4600121df2e60",
+                "fa69b07040e0c32c"
+            ]
+        ]
+    },
+    {
+        "id": "6c2ef4c65aab5a5e",
+        "type": "inject",
+        "z": "0395f5bb7c49302c",
+        "name": "Ejecutar",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "10",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "str",
+        "x": 120,
+        "y": 220,
+        "wires": [
+            [
+                "aeb8ae135358ab23"
+            ]
+        ]
+    },
+    {
+        "id": "aeb8ae135358ab23",
+        "type": "function",
+        "z": "0395f5bb7c49302c",
+        "name": "Recibir datos",
+        "func": "msg.topic = \"SELECT id, temperature, humidity, timestamp FROM datos_sensor ORDER BY timestamp DESC LIMIT 1\";\nreturn msg;\n\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 310,
+        "y": 220,
+        "wires": [
+            [
+                "9a06aacacfc43246"
+            ]
+        ]
+    },
+    {
+        "id": "56b4600121df2e60",
+        "type": "function",
+        "z": "0395f5bb7c49302c",
+        "name": "grafico temperatura ",
+        "func": "// Recupera el array de objetos desde msg.payload\nconst temperature = msg.payload[0].temperature;\nmsg.payload = temperature;\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 790,
+        "y": 200,
+        "wires": [
+            [
+                "66e60c27af976437"
+            ]
+        ]
+    },
+    {
+        "id": "fa69b07040e0c32c",
+        "type": "function",
+        "z": "0395f5bb7c49302c",
+        "name": "formato texto ",
+        "func": "const temperature = msg.payload[0].temperature;\nconst humidity = msg.payload[0].humidity;\nmsg.payload = { temperature, humidity };\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 770,
+        "y": 320,
+        "wires": [
+            [
+                "7ea41af2ad84fa89",
+                "d9b1ce58c277629d",
+                "594282f31f1946d9",
+                "c664bd839b155b50"
+            ]
+        ]
+    },
+    {
+        "id": "5f287e4c79591d49",
+        "type": "ui_toast",
+        "z": "0395f5bb7c49302c",
+        "position": "top right",
+        "displayTime": "5",
+        "highlight": "",
+        "sendall": true,
+        "outputs": 0,
+        "ok": "OK",
+        "cancel": "",
+        "raw": false,
+        "className": "",
+        "topic": "esp32/sensordata",
+        "name": "",
+        "x": 1030,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "66e60c27af976437",
+        "type": "ui_chart",
+        "z": "0395f5bb7c49302c",
+        "name": "",
+        "group": "10956751da83f232",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "label": "Grafico de Temperatura",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 1070,
+        "y": 200,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "d9b1ce58c277629d",
+        "type": "ui_text",
+        "z": "0395f5bb7c49302c",
+        "group": "10956751da83f232",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Temperatura: ",
+        "format": "{{msg.payload.temperature}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 1070,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "7ea41af2ad84fa89",
+        "type": "ui_text",
+        "z": "0395f5bb7c49302c",
+        "group": "10956751da83f232",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Humedad:",
+        "format": "{{msg.payload.humidity}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 1070,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "c7c294d85ef387ec",
+        "type": "ui_chart",
+        "z": "0395f5bb7c49302c",
+        "name": "",
+        "group": "10956751da83f232",
+        "order": 6,
+        "width": 0,
+        "height": 0,
+        "label": "Grafico de Humedad",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 1100,
+        "y": 460,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "712dacd822b15cb2",
+        "type": "ui_toast",
+        "z": "0395f5bb7c49302c",
+        "position": "top right",
+        "displayTime": "3",
+        "highlight": "",
+        "sendall": true,
+        "outputs": 0,
+        "ok": "OK",
+        "cancel": "",
+        "raw": false,
+        "className": "",
+        "topic": "",
+        "name": "",
+        "x": 1050,
+        "y": 620,
+        "wires": []
+    },
+    {
+        "id": "10956751da83f232",
+        "type": "ui_group",
+        "name": "dashboard",
+        "tab": "4fa662fcf749ed47",
+        "order": 1,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "029119d4ed087382",
+        "type": "MySQLdatabase",
+        "name": "evidencia2",
+        "host": "localhost",
+        "port": "3306",
+        "db": "evidencia2",
+        "tz": "",
+        "charset": "UTF8"
+    },
+    {
+        "id": "4fa662fcf749ed47",
+        "type": "ui_tab",
+        "name": "Flow 1",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    }
+]
